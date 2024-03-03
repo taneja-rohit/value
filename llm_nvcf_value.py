@@ -1,68 +1,88 @@
 import streamlit as st
 
-# Function to calculate TCO for managed service
-def calculate_managed_service_tco(nvcf_pricing, dl_services_cost, private_addon_cost, data_connectivity_cost, nvidia_nim_cost, other_software_cost):
-    return nvcf_pricing + dl_services_cost + private_addon_cost + data_connectivity_cost + nvidia_nim_cost + other_software_cost
+# Function to calculate TCO for managed service and partner DIY
+def calculate_tco(gpu_hourly_rate, dl_services_yearly, private_addon_yearly, data_connectivity_yearly, nvidia_nim_yearly, other_software_yearly,
+                  storage_yearly, networking_yearly, data_center_yearly, kubernetes_yearly, sre_yearly, data_yearly, security_yearly, update_yearly):
+    compute_yearly = gpu_hourly_rate * 24 * 365  # Convert hourly rate to yearly
+    managed_service_tco = compute_yearly + dl_services_yearly + private_addon_yearly + data_connectivity_yearly + nvidia_nim_yearly + other_software_yearly
+    partner_diy_tco = compute_yearly + storage_yearly + networking_yearly + data_center_yearly + kubernetes_yearly + sre_yearly + data_yearly + security_yearly + update_yearly
+    return managed_service_tco, partner_diy_tco
 
-# Function to calculate TCO for customer-built environment
-def calculate_customer_built_tco(compute_cost, storage_cost, networking_cost, data_center_cost, kubernetes_cost, sre_cost, data_cost, security_cost, update_cost):
-    return compute_cost + storage_cost + networking_cost + data_center_cost + kubernetes_cost + sre_cost + data_cost + security_cost + update_cost
+# Function to calculate cost per 1M tokens based on GPU type, processing time, and model size
+def calculate_cost_per_million_tokens(gpu_hourly_rate, processing_time_seconds, model_size_billion_parameters):
+    processing_time_hours = (processing_time_seconds / 3600.0) * (model_size_billion_parameters / 1)  # Adjusted for model size
+    cost_per_million_tokens = gpu_hourly_rate * processing_time_hours
+    return cost_per_million_tokens
 
-# Function to convert token pricing to GPU per hour pricing
-def convert_token_to_gpu_pricing(cost_per_1000_tokens, tokens_per_request, requests_per_hour):
-    cost_per_request = (cost_per_1000_tokens / 1000) * tokens_per_request
-    total_cost_per_hour = cost_per_request * requests_per_hour
-    return total_cost_per_hour
+# Main app
+def main():
+    st.sidebar.title('Navigation')
+    section = st.sidebar.radio('Go to', ['TCO Comparison', 'GPU-Hour to Token Pricing'])
 
-# Sidebar for navigation
-st.sidebar.title('Navigation')
-section = st.sidebar.radio('Go to', ['TCO Comparison', 'Token to GPU-Hour Pricing'])
+    if section == 'TCO Comparison':
+        st.title('LLM Inference TCO Comparison Tool')
 
-if section == 'TCO Comparison':
-    st.title('LLM Inference TCO Comparison Tool')
+        st.header('Managed Service Costs')
+        gpu_type_managed = st.selectbox('Select GPU type for Managed Service:', ['A100', 'H100', 'L40S'], key='gpu_type_managed')
+        gpu_hourly_rate_managed = st.number_input(f'{gpu_type_managed} Hourly Rate ($):', key='gpu_hourly_rate_managed')
 
-    # Managed Service Costs
-    st.header('Managed Service Costs')
-    ms_compute_cost = st.number_input('NVCF pricing ($)', value=1000.0, key='ms_compute')
-    ms_storage_cost = st.number_input('DL Professional Services Cost ($)', value=500.0, key='ms_storage')
-    ms_networking_cost = st.number_input('Private offering add-on ($)', value=300.0, key='ms_networking')
-    ms_data_center_cost = st.number_input('Data connectivity cost ($)', value=200.0, key='ms_data_center')
-    ms_nvidia_nim_cost = st.number_input('NVIDIA NIM Cost ($)', value=100.0, key='ms_nvidia_nim')
-    ms_other_software_cost = st.number_input('Other Software Cost ($)', value=100.0, key='ms_other_software')
+        dl_services_yearly = st.number_input('DL Professional Services Cost (Yearly $):', value=500.0)
+        private_addon_yearly = st.number_input('Private offering add-on (Yearly $):', value=300.0)
+        data_connectivity_yearly = st.number_input('Data connectivity cost (Yearly $):', value=200.0)
+        nvidia_nim_yearly = st.number_input('NVIDIA NIM Cost (Yearly $):', value=100.0)
+        other_software_yearly = st.number_input('Other Software Cost (Yearly $):', value=100.0)
 
-    # Customer-Built Environment Costs
-    st.header('Customer-Built Environment Costs')
-    cb_compute_cost = st.number_input('Compute Cost ($)', value=1000.0, key='cb_compute')
-    cb_storage_cost = st.number_input('Storage Cost ($)', value=500.0, key='cb_storage')
-    cb_networking_cost = st.number_input('Networking Cost ($)', value=300.0, key='cb_networking')
-    cb_data_center_cost = st.number_input('Data Center Cost ($)', value=200.0, key='cb_data_center')
-    cb_kubernetes_cost = st.number_input('Kubernetes/Autoscaling Cost ($)', value=400.0, key='cb_kubernetes')
-    cb_sre_cost = st.number_input('SRE / Human-in-loop Cost ($)', value=400.0, key='cb_sre')
-    cb_data_cost = st.number_input('Data connectivity Cost ($)', value=400.0, key='cb_data')
-    cb_security_cost = st.number_input('Security Cost ($)', value=400.0, key='cb_security')
-    cb_update_cost = st.number_input('Software Update - versioning and variance cost ($)', value=400.0, key='cb_update')
+        st.header('Partner DIY Costs')
+        gpu_type_diy = st.selectbox('Select GPU type for Partner DIY:', ['A100', 'H100', 'L40S'], key='gpu_type_diy')
+        gpu_hourly_rate_diy = st.number_input(f'{gpu_type_diy} Hourly Rate ($):', key='gpu_hourly_rate_diy')
 
-    # Calculate TCO button
-    if st.button('Calculate TCO'):
-        ms_tco = calculate_managed_service_tco(ms_compute_cost, ms_storage_cost, ms_networking_cost, ms_data_center_cost, ms_nvidia_nim_cost, ms_other_software_cost)
-        cb_tco = calculate_customer_built_tco(cb_compute_cost, cb_storage_cost, cb_networking_cost, cb_data_center_cost, cb_kubernetes_cost, cb_sre_cost, cb_data_cost, cb_security_cost, cb_update_cost)
-        
-        st.subheader('Results')
-        st.write(f'Managed Service TCO: ${ms_tco}')
-        st.write(f'Customer-Built Environment TCO: ${cb_tco}')
-        
-        if ms_tco < cb_tco:
-            st.success('Managed Service is more cost-effective.')
-        else:
-            st.error('Customer-Built Environment is more cost-effective.')
+        storage_yearly = st.number_input('Storage Cost (Yearly $):', value=500.0)
+        networking_yearly = st.number_input('Networking Cost (Yearly $):', value=300.0)
+        data_center_yearly = st.number_input('Data Center Cost (Yearly $):', value=200.0)
+        kubernetes_yearly = st.number_input('Kubernetes/Autoscaling Cost (Yearly $):', value=400.0)
+        sre_yearly = st.number_input('SRE / Human-in-loop Cost (Yearly $):', value=400.0)
+        data_yearly = st.number_input('Data connectivity Cost (Yearly $):', value=400.0)
+        security_yearly = st.number_input('Security Cost (Yearly $):', value=400.0)
+        update_yearly = st.number_input('Software Update - versioning and variance cost (Yearly $):', value=400.0)
 
-elif section == 'Token to GPU-Hour Pricing':
-    st.title('Token to GPU-Hour Pricing Converter')
+        if st.button('Calculate Yearly TCO'):
+            managed_service_tco, partner_diy_tco = calculate_tco(
+                gpu_hourly_rate_managed, dl_services_yearly, private_addon_yearly, data_connectivity_yearly, nvidia_nim_yearly, other_software_yearly,
+                storage_yearly, networking_yearly, data_center_yearly, kubernetes_yearly, sre_yearly, data_yearly, security_yearly, update_yearly)
+            st.subheader('Results (Yearly Costs)')
+            st.write(f'Managed Service TCO for {gpu_type_managed}: ${managed_service_tco:,.2f}')
+            st.write(f'Partner DIY TCO for {gpu_type_diy}: ${partner_diy_tco:,.2f}')
+            if managed_service_tco < partner_diy_tco:
+                st.success('Managed Service is more cost-effective.')
+            else:
+                st.error('Partner DIY is more cost-effective.')
 
-    cost_per_1000_tokens = st.number_input('Cost per 1,000 Tokens ($)', value=3.0)
-    tokens_per_request = st.number_input('Tokens per Request', value=4000.0)
-    requests_per_hour = st.number_input('Requests per Hour', value=1000.0)
+    elif section == 'GPU-Hour to Token Pricing':
+        st.title('GPU-Hour to Token Pricing Converter')
+        gpu_type = st.selectbox('Select GPU type:', ['A100', 'H100', 'L40S'])
+        gpu_hourly_rate = st.number_input(f'{gpu_type} Hourly Rate ($):', value=4.0)
+        processing_time_seconds = st.number_input('Processing time for 1B*1M tokens (in seconds):', value=60.0)
 
-    if st.button('Convert Pricing'):
-        gpu_cost_per_hour = convert_token_to_gpu_pricing(cost_per_1000_tokens, tokens_per_request, requests_per_hour)
-        st.write(f'Equivalent GPU Cost per Hour: ${gpu_cost_per_hour:.2f}')
+        # Allow user to add a custom model
+        custom_model_name = st.text_input("Custom model name (e.g., Custom-1B):", "")
+        custom_model_size = st.number_input("Custom model size in billion parameters:", value=0.0, format="%.2f")
+
+        st.write('### Cost per 1M Tokens for Different Models')
+        model_sizes = {'LLaMA-7B': 7, 'LLaMA-13B': 13, 'LLaMA-70B': 70, 'Mistral-7B': 7, 'Mistral-8*7B': 56}
+        if custom_model_name and custom_model_size > 0:
+            model_sizes[custom_model_name] = custom_model_size  # Add custom model to the dictionary
+
+        for model, size in model_sizes.items():
+            cost_per_million_tokens = calculate_cost_per_million_tokens(gpu_hourly_rate, processing_time_seconds, size)
+            st.write(f'{model} on {gpu_type}: ${cost_per_million_tokens:.4f} per 1M tokens')
+
+        st.write("""
+        **Formula Explanation**:
+        The cost to process 1M tokens for a model is calculated based on the GPU's hourly rate and the processing time for the model.
+        The processing time is adjusted based on the model size (in billion parameters), assuming linear scaling.
+        Formula: Cost per 1M Tokens = GPU Hourly Rate * (Adjusted Processing Time per 1M Tokens / 3600) * Model Size (in billion parameters)
+        """)
+
+if __name__ == "__main__":
+    main()
+
