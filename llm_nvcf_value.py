@@ -27,24 +27,24 @@ def main():
         gpu_hourly_rate_managed = st.number_input(f'{gpu_type_managed} Hourly Rate ($):', key='gpu_hourly_rate_managed')
 
         st.subheader('Upsell Opportunity')
-        dl_services_yearly = st.number_input('DL Professional Services Cost (Yearly $):', value=500.0)
+        dl_services_yearly = st.number_input('DL Professional Services Cost (Yearly $):', value=0.0)
         #private_addon_yearly = st.number_input('Private offering add-on (Yearly $):', value=300.0)
         #data_connectivity_yearly = st.number_input('Data connectivity cost (Yearly $):', value=200.0)
-        nvidia_nim_yearly = st.number_input('NVIDIA NVIDIA/NIM Cost (Yearly $):', value=100.0)
+        nvidia_nim_yearly = st.number_input('NVIDIA NVIDIA/NIM Cost (Yearly $):', value=4500.0)
         #other_software_yearly = st.number_input('Other Software Cost (Yearly $):', value=100.0)
 
         st.header('Partner DIY Costs')
         gpu_type_diy = st.selectbox('Select GPU type for Partner DIY:', ['A100', 'H100', 'L40S'], key='gpu_type_diy')
         gpu_hourly_rate_diy = st.number_input(f'{gpu_type_diy} Hourly Rate ($):', key='gpu_hourly_rate_diy')
 
-        storage_yearly = st.number_input('Storage Cost (Yearly $):', value=500.0)
-        networking_yearly = st.number_input('Networking Cost (Yearly $):', value=300.0)
-        data_center_yearly = st.number_input('Data Center Cost (Yearly $):', value=200.0)
-        kubernetes_yearly = st.number_input('Kubernetes/Autoscaling Cost (Yearly $):', value=400.0)
-        sre_yearly = st.number_input('SRE / Human-in-loop Cost (Yearly $):', value=400.0)
+        storage_yearly = st.number_input('Storage Cost (Yearly $):', value=5000.0)
+        networking_yearly = st.number_input('Networking Cost (Yearly $):', value=3000.0)
+        data_center_yearly = st.number_input('Data Center Cost (Yearly $):', value=20000.0)
+        kubernetes_yearly = st.number_input('Kubernetes/Autoscaling Cost (Yearly $):', value=10000.0)
+        sre_yearly = st.number_input('SRE / Human-in-loop Cost (Yearly $):', value=500000.0)
         data_yearly = st.number_input('Data connectivity Cost (Yearly $):', value=400.0)
-        security_yearly = st.number_input('Security Cost (Yearly $):', value=400.0)
-        update_yearly = st.number_input('Software Update - versioning and variance cost (Yearly $):', value=400.0)
+        security_yearly = st.number_input('Security Cost (Yearly $):', value=400000.0)
+        update_yearly = st.number_input('Software Update - versioning and variance cost (Yearly $):', value=100000.0)
 
         if st.button('Calculate Yearly TCO'):
             managed_service_tco, partner_diy_tco = calculate_tco(
