@@ -1,4 +1,5 @@
 import streamlit as st
+import pandas as pd 
 
 # Function to calculate TCO for managed service and partner DIY
 def calculate_tco(gpu_hourly_rate, dl_services_yearly, nvidia_nim_yearly,
@@ -65,7 +66,7 @@ def main():
         processing_time_input_seconds = st.number_input('Processing time for Input 1B params *1M tokens (in seconds):', value=60.0)
         processing_time_output_seconds = st.number_input('Processing time for Output 1B params *1M tokens (in seconds):', value=60.0)
 
-        # Allow user to add a custom model
+    # Allow user to add a custom model
         custom_model_name = st.text_input("Custom model name (e.g., Custom-1B):", "")
         custom_model_size = st.number_input("Custom model size in billion parameters:", value=0.0, format="%.2f")
 
@@ -74,11 +75,16 @@ def main():
         if custom_model_name and custom_model_size > 0:
             model_sizes[custom_model_name] = custom_model_size  # Add custom model to the dictionary
 
+        # Prepare data for the table
+        data = []
         for model, size in model_sizes.items():
             cost_per_million_input_tokens = calculate_cost_per_million_tokens(gpu_hourly_rate, processing_time_input_seconds, size)
             cost_per_million_output_tokens = calculate_cost_per_million_tokens(gpu_hourly_rate, processing_time_output_seconds, size)
-            st.write(f'{model} on {gpu_type} - Input : ${cost_per_million_input_tokens:.4f} per 1M tokens')
-            st.write(f'{model} on {gpu_type} - Output : ${cost_per_million_output_tokens:.4f} per 1M tokens')
+            data.append([model, f'${cost_per_million_input_tokens:.4f}', f'${cost_per_million_output_tokens:.4f}'])
+
+        # Convert data to a DataFrame and display as a table
+        df = pd.DataFrame(data, columns=['Model', 'Input Tokens Pricing /1M', 'Output Tokens Pricing /1M'])
+        st.table(df)
 
         st.write("""
         **Formula Explanation**:
@@ -86,7 +92,9 @@ def main():
         The processing time is adjusted based on the model size (in billion parameters), assuming linear scaling.
         Formula: Cost per 1M Tokens = GPU Hourly Rate * (Adjusted Processing Time per 1M Tokens / 3600) * Model Size (in billion parameters)
         """)
+ 
 
+   
 if __name__ == "__main__":
     main()
 
