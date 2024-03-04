@@ -1,10 +1,10 @@
 import streamlit as st
 
 # Function to calculate TCO for managed service and partner DIY
-def calculate_tco(gpu_hourly_rate, dl_services_yearly, private_addon_yearly, data_connectivity_yearly, nvidia_nim_yearly, other_software_yearly,
+def calculate_tco(gpu_hourly_rate, dl_services_yearly, nvidia_nim_yearly,
                   storage_yearly, networking_yearly, data_center_yearly, kubernetes_yearly, sre_yearly, data_yearly, security_yearly, update_yearly):
     compute_yearly = gpu_hourly_rate * 24 * 365  # Convert hourly rate to yearly
-    managed_service_tco = compute_yearly + dl_services_yearly + private_addon_yearly + data_connectivity_yearly + nvidia_nim_yearly + other_software_yearly
+    managed_service_tco = compute_yearly + dl_services_yearly + nvidia_nim_yearly 
     partner_diy_tco = compute_yearly + storage_yearly + networking_yearly + data_center_yearly + kubernetes_yearly + sre_yearly + data_yearly + security_yearly + update_yearly
     return managed_service_tco, partner_diy_tco
 
@@ -48,7 +48,7 @@ def main():
 
         if st.button('Calculate Yearly TCO'):
             managed_service_tco, partner_diy_tco = calculate_tco(
-                gpu_hourly_rate_managed, dl_services_yearly, private_addon_yearly, data_connectivity_yearly, nvidia_nim_yearly, other_software_yearly,
+                gpu_hourly_rate_managed, dl_services_yearly, nvidia_nim_yearly,
                 storage_yearly, networking_yearly, data_center_yearly, kubernetes_yearly, sre_yearly, data_yearly, security_yearly, update_yearly)
             st.subheader('Results (Yearly Costs)')
             st.write(f'Managed Service TCO for {gpu_type_managed}: ${managed_service_tco:,.2f}')
