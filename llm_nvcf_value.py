@@ -62,7 +62,8 @@ def main():
         st.title('GPU-Hour to Token Pricing Converter')
         gpu_type = st.selectbox('Select GPU type:', ['A100', 'H100', 'L40S'])
         gpu_hourly_rate = st.number_input(f'{gpu_type} Hourly Rate ($):', value=4.0)
-        processing_time_seconds = st.number_input('Processing time for 1B*1M tokens (in seconds):', value=60.0)
+        processing_time_input_seconds = st.number_input('Processing time for Input 1B params *1M tokens (in seconds):', value=60.0)
+        processing_time_output_seconds = st.number_input('Processing time for Output 1B params *1M tokens (in seconds):', value=60.0)
 
         # Allow user to add a custom model
         custom_model_name = st.text_input("Custom model name (e.g., Custom-1B):", "")
@@ -74,8 +75,10 @@ def main():
             model_sizes[custom_model_name] = custom_model_size  # Add custom model to the dictionary
 
         for model, size in model_sizes.items():
-            cost_per_million_tokens = calculate_cost_per_million_tokens(gpu_hourly_rate, processing_time_seconds, size)
-            st.write(f'{model} on {gpu_type}: ${cost_per_million_tokens:.4f} per 1M tokens')
+            cost_per_million_input_tokens = calculate_cost_per_million_tokens(gpu_hourly_rate, processing_time_input_seconds, size)
+            cost_per_million_output_tokens = calculate_cost_per_million_tokens(gpu_hourly_rate, processing_time_output_seconds, size)
+            st.write(f'{model} on {gpu_type} - Input : ${cost_per_million_input_tokens:.4f} per 1M tokens')
+            st.write(f'{model} on {gpu_type} - Output : ${cost_per_million_output_tokens:.4f} per 1M tokens')
 
         st.write("""
         **Formula Explanation**:
