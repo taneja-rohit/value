@@ -26,11 +26,12 @@ def main():
         gpu_type_managed = st.selectbox('Select GPU type for Managed Service:', ['A100', 'H100', 'L40S'], key='gpu_type_managed')
         gpu_hourly_rate_managed = st.number_input(f'{gpu_type_managed} Hourly Rate ($):', key='gpu_hourly_rate_managed')
 
+        st.subheader('Upsell Opportunity')
         dl_services_yearly = st.number_input('DL Professional Services Cost (Yearly $):', value=500.0)
-        private_addon_yearly = st.number_input('Private offering add-on (Yearly $):', value=300.0)
-        data_connectivity_yearly = st.number_input('Data connectivity cost (Yearly $):', value=200.0)
-        nvidia_nim_yearly = st.number_input('NVIDIA NIM Cost (Yearly $):', value=100.0)
-        other_software_yearly = st.number_input('Other Software Cost (Yearly $):', value=100.0)
+        #private_addon_yearly = st.number_input('Private offering add-on (Yearly $):', value=300.0)
+        #data_connectivity_yearly = st.number_input('Data connectivity cost (Yearly $):', value=200.0)
+        nvidia_nim_yearly = st.number_input('NVIDIA NVIDIA/NIM Cost (Yearly $):', value=100.0)
+        #other_software_yearly = st.number_input('Other Software Cost (Yearly $):', value=100.0)
 
         st.header('Partner DIY Costs')
         gpu_type_diy = st.selectbox('Select GPU type for Partner DIY:', ['A100', 'H100', 'L40S'], key='gpu_type_diy')
